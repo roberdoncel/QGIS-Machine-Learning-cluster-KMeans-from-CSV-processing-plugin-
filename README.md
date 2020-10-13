@@ -5,3 +5,4 @@ Es necesario tener instalado en QGIS la librería scikit-sklearn.
 
 Para el ejemplo se ha usado un dataset del despliegue de redes Ftth en Francia, https://www.data.gouv.fr/es/datasets/planning-des-deploiements-ftth/. Aunque no tiene mucho sentido práctico, el ejercicio se podría interpretar como donde y cuantas oficinas de apoyo pondrías para atender de manera eficiente toda la red.
 
+![header image](https://raw.githubusercontent.com/roberdoncel/QGIS-Machine-Learning-cluster-KMeans-from-CSV-processing-plugin-/main/screenshot.png)
