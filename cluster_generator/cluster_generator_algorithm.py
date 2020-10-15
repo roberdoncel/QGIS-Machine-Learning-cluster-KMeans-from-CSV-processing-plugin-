@@ -175,18 +175,29 @@ class ClustersGeneratorAlgorithm(QgsProcessingAlgorithm):
         df_coords = pd.DataFrame(columns=["Latitud", "Longitud"])
         if lat_col != long_col:
             for reg in data:
-                df_coords = df_coords.append({"Latitud": data[lat_col], "Longitud": data[long_col]}, ignore_index=True)
+                #Deberíamos comprobar si el los datos tienen un formato adecuado.
+                if isinstance(lat_col, (int, float)) and isinstance(long_col, (int, float)):
+                    df_coords = df_coords.append({"Latitud": data[lat_col], "Longitud": data[long_col]}, ignore_index=True)
+                else:
+                    print("No se ha podido extraer las coordenadas")
+                    exit()
         else:
-            for reg in data[lat_col]:
-                coords = reg.split(sep, 1)
-                df_coords = df_coords.append({"Latitud": coords[0], "Longitud": coords[1]}, ignore_index=True)
-        
+            try:
+                for reg in data[lat_col]:
+                    coords = reg.split(sep, 1)
+                    coords[0] = float(coords[0])
+                    coords[1] = float(coords[1])
+                    if isinstance(coords[0], (int, float)) and isinstance(coords[1], (int, float)):
+                        df_coords = df_coords.append({"Latitud": coords[0], "Longitud": coords[1]}, ignore_index=True)
+            except:
+                print("No se ha podido extraer las coordenadas")
+                exit()
         print(df_coords.head())
         return df_coords
 
     
     #devuelve el número óptimo de clusters de acuerdo al coeficiente Silhouette
-    def get_optimized_n_clusters(self, data, max_clusters=100, n_init=10 , feedback):
+    def get_optimized_n_clusters(self, data, max_clusters=100, n_init=10):
         best_result = {}
         best_score = 0
 
@@ -236,6 +247,7 @@ class ClustersGeneratorAlgorithm(QgsProcessingAlgorithm):
 
         #Extraemos las coordenadas Latitud y Longitud
         df_coords = self.extract_coords(df, parameters['LAT_COLUMN'], parameters['LONG_COLUMN'], parameters['COORDS_SEPARATOR'])
+        print(df_coords)
 
         feedback.setProgress(20)
 
@@ -260,10 +272,10 @@ class ClustersGeneratorAlgorithm(QgsProcessingAlgorithm):
         #coordenadas de los centroides en el sistema de coordenadas entrante.
         print(kmeans.cluster_centers_)
 
-        #Ya podríamos crear una capa de salida con las coordenadas de los centroides.
-        project = QgsProject.instance()
 
-        crs_output = QgsCoordinateReferenceSystem(4326)
+        project = QgsProject.instance()
+        #crs_output = QgsCoordinateReferenceSystem(4326)
+        crs_output = project.crs()
 
         #Capa Vector que contendrá la geometría. 0 indica que es del tipo integer
         #vector_layer = QgsVectorLayer("Point?crs=EPSG:4326&field=cluster_id:0", "Centroides", "memory")
